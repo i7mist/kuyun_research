@@ -6,6 +6,8 @@ import pickle
 from datetime import date, datetime
 import pandas as pd
 import statsmodels.formula.api as smf
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from statsmodels.tools.tools import add_constant
 
 if len(sys.argv) > 1:
     check_day = int(sys.argv[1])
@@ -98,3 +100,9 @@ plt.show()
 mod = smf.ols(formula='cur_rating ~ prev_rating + year + prev_ep_count + cur_ep_count', data=dep_rel_df)
 res = mod.fit()
 print(res.summary())
+
+# calculate variance inflation factor to quantify multicollinearity
+X = add_constant(dep_rel_df[["prev_rating", "year", "prev_ep_count", "cur_ep_count"]])
+print(pd.Series([variance_inflation_factor(X.values, i)
+               for i in range(X.shape[1])],
+              index=X.columns))
